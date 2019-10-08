@@ -1,0 +1,3 @@
+AATAGCTAGCTAGCTATAAA	2 copy target	1000
+CAGCTACTAGCTAGTCGATG	2 copy target	1000
+CCCCCCCCCCCCCCCCCCCC	not a target at all. should get 0	0
