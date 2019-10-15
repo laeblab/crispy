@@ -7,9 +7,7 @@ impl KMer {
     pub fn new(kmer: u32) -> KMer {
         KMer(kmer)
     }
-}
 
-impl KMer {
     pub fn key(self) -> usize {
         self.0 as usize
     }
