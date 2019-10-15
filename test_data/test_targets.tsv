@@ -1,3 +1,0 @@
-AATAGCTAGCTAGCTATAAA	2 copy target
-CAGCTACTAGCTAGTCGATG	2 copy target
-CCCCCCCCCCCCCCCCCCCC	not a target at all. should get 0

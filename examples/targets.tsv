@@ -1,0 +1,3 @@
+AATAGCTAGCTAGCTATAAAAGG	2 copy target
+CAGCTACTAGCTAGTCGATGNGG	2 copy target
+CCCCCCCCCCCCCCCCCCCCCGG	not a target at all. should get 0
