@@ -1,3 +1,6 @@
+use std::io;
+use std::io::Write;
+
 use clap::{App, Arg, ArgMatches, SubCommand};
 
 use crate::enzyme::Enzyme;
@@ -142,15 +145,18 @@ fn parse_threads(matches: &ArgMatches) -> Result<usize> {
     }
 }
 
-pub fn parse_args() -> Result<Args> {
-    let matches = App::new("CRISPyR")
-        .version("0.1.0")
+fn new_parser<'a, 'b>() -> App<'a, 'b> {
+    App::new("CRISPyR")
+        .version("0.1.1")
         .author("Mikkel Schubert")
         .subcommand(index_command())
         .subcommand(score_command())
         .subcommand(find_command())
         .subcommand(off_targets_command())
-        .get_matches();
+}
+
+pub fn parse_args() -> Result<Args> {
+    let matches = new_parser().get_matches();
 
     if let Some(matches) = matches.subcommand_matches("index") {
         let enzyme_str = get_str(matches, "enzyme")?;
@@ -183,7 +189,9 @@ pub fn parse_args() -> Result<Args> {
             threads: parse_threads(matches)?,
         }))
     } else {
-        eprintln!("{}", matches.usage());
+        let mut out = io::stderr();
+        let _ = new_parser().write_help(&mut out);
+        let _ = writeln!(out);
 
         Ok(Args::None)
     }
