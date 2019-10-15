@@ -144,7 +144,7 @@ fn parse_threads(matches: &ArgMatches) -> Result<usize> {
 
 pub fn parse_args() -> Result<Args> {
     let matches = App::new("CRISPyR")
-        .version("0.0.1")
+        .version("0.1.0")
         .author("Mikkel Schubert")
         .subcommand(index_command())
         .subcommand(score_command())
