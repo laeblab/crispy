@@ -61,7 +61,10 @@ This will create the index file 'examples/genome.fasta.crispyr_mad7'. Note that
 the cut-site for Mad7 is not documented, and results will therefore not show
 the expected cut-site for target sequences.
 
-The index command can also be run with "--positions" to record the positions of all PAM sites in the genome. This takes longer, but is required to run the offtargetss command. 
+The index command can also be run with '--positions' to record the positions of
+all PAM sites in the genome. This takes longer and significantly increases the
+size of the index, but is required to run the 'offtargets' command.
+
 
 ### Finding target sequences
 
