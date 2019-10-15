@@ -4,6 +4,7 @@ use bio_types::strand::Strand;
 use rayon::prelude::*;
 
 use crate::args::FindArgs;
+use crate::common::open_file_or_stdout;
 use crate::errors::*;
 use crate::index::KMerIndex;
 use crate::pam::Position;
@@ -94,7 +95,9 @@ pub fn main(args: &FindArgs) -> Result<()> {
     let reader = Reader::from_file(&args.targets)
         .chain_err(|| format!("failed to open FASTA file {:?}", args.targets))?;
 
-    println!("Sequence\tName\tStart\tEnd\tCutsite\tStrand\tScore");
+    let mut out = open_file_or_stdout(&args.output)?;
+    writeln!(out, "Sequence\tName\tStart\tEnd\tCutsite\tStrand\tScore")
+        .chain_err(|| "failed to write output header")?;
 
     let enzyme = index.enzyme();
     let grna_len = enzyme.grna_len;
@@ -119,7 +122,8 @@ pub fn main(args: &FindArgs) -> Result<()> {
                 *nuc = nuc.to_ascii_lowercase();
             }
 
-            println!(
+            writeln!(
+                out,
                 "{}\t{}\t{}\t{}\t{}\t{}\t{}",
                 String::from_utf8_lossy(&sequence),
                 target.id(),
@@ -130,7 +134,8 @@ pub fn main(args: &FindArgs) -> Result<()> {
                     .unwrap_or_else(|| "NA".to_owned()),
                 site.strand.strand_symbol(),
                 site.score,
-            );
+            )
+            .chain_err(|| "failed to write output row")?;
         }
 
         progress.finish();

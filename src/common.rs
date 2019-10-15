@@ -1,4 +1,9 @@
+use std::fs::File;
+use std::io;
+use std::io::Write;
+
 use crate::constants::KMER_LEN;
+use crate::errors::*;
 
 #[derive(Hash, PartialEq, Eq, Debug, Clone, Copy)]
 pub struct KMer(pub u32);
@@ -29,4 +34,16 @@ pub fn encode_dna(seq: &[u8]) -> Option<KMer> {
     }
 
     Some(KMer::new(encoded_dna))
+}
+
+pub fn open_file_or_stdout(file: &Option<String>) -> Result<Box<dyn Write>> {
+    if let Some(path) = file {
+        let handle =
+            File::create(path).chain_err(|| format!("could not create output file {:?}", path))?;
+        let writer = io::BufWriter::new(handle);
+
+        Ok(Box::new(writer))
+    } else {
+        Ok(Box::new(io::stdout()))
+    }
 }

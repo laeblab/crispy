@@ -18,6 +18,7 @@ pub struct IndexArgs {
 pub struct ScoreArgs {
     pub index: String,
     pub table: String,
+    pub output: Option<String>,
     pub threads: usize,
 }
 
@@ -25,6 +26,7 @@ pub struct ScoreArgs {
 pub struct FindArgs {
     pub index: String,
     pub targets: String,
+    pub output: Option<String>,
     pub threads: usize,
 }
 
@@ -32,6 +34,7 @@ pub struct FindArgs {
 pub struct OffTargetsArgs {
     pub index: String,
     pub table: String,
+    pub output: Option<String>,
 }
 
 pub enum Args {
@@ -40,6 +43,15 @@ pub enum Args {
     Find(FindArgs),
     OffTargets(OffTargetsArgs),
     None,
+}
+
+fn args_output<'a, 'b>() -> Arg<'a, 'b> {
+    Arg::with_name("output")
+        .long("output")
+        .short("o")
+        .takes_value(true)
+        .number_of_values(1)
+        .help("Write output to file instead of STDOUT")
 }
 
 fn index_command<'a, 'b>() -> App<'a, 'b> {
@@ -74,6 +86,7 @@ fn score_command<'a, 'b>() -> App<'a, 'b> {
                 .help("Table containing target sequences.")
                 .required(true),
         )
+        .arg(args_output())
         .arg(
             Arg::with_name("threads")
                 .long("threads")
@@ -98,6 +111,7 @@ fn find_command<'a, 'b>() -> App<'a, 'b> {
                 .help("FASTA file containing one or more sequences.")
                 .required(true),
         )
+        .arg(args_output())
         .arg(
             Arg::with_name("threads")
                 .long("threads")
@@ -122,6 +136,7 @@ fn off_targets_command<'a, 'b>() -> App<'a, 'b> {
                 .help("Table containing target sequences.")
                 .required(true),
         )
+        .arg(args_output())
         .alias("off_targets")
 }
 
@@ -175,17 +190,20 @@ pub fn parse_args() -> Result<Args> {
         Ok(Args::Score(ScoreArgs {
             index: get_string(matches, "index")?,
             table: get_string(matches, "table")?,
+            output: matches.value_of("output").map(|s| s.to_string()),
             threads: parse_threads(matches)?,
         }))
     } else if let Some(matches) = matches.subcommand_matches("offtargets") {
         Ok(Args::OffTargets(OffTargetsArgs {
             index: get_string(matches, "index")?,
             table: get_string(matches, "table")?,
+            output: matches.value_of("output").map(|s| s.to_string()),
         }))
     } else if let Some(matches) = matches.subcommand_matches("find") {
         Ok(Args::Find(FindArgs {
             index: get_string(matches, "index")?,
             targets: get_string(matches, "targets")?,
+            output: matches.value_of("output").map(|s| s.to_string()),
             threads: parse_threads(matches)?,
         }))
     } else {

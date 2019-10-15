@@ -1,7 +1,8 @@
 use std::collections::HashSet;
+use std::io::Write;
 
 use crate::args::OffTargetsArgs;
-use crate::common::encode_dna;
+use crate::common::{encode_dna, open_file_or_stdout};
 use crate::constants::*;
 use crate::errors::*;
 use crate::index::KMerIndex;
@@ -9,7 +10,12 @@ use crate::pam::Position;
 use crate::score::find_offtargets;
 use crate::table;
 
-fn print_off_targets(index: &KMerIndex, query: &str, value: &str) {
+fn write_off_targets(
+    out: &mut dyn Write,
+    index: &KMerIndex,
+    query: &str,
+    value: &str,
+) -> Result<()> {
     let enzyme = index.enzyme();
     let refseqs = index.refseqs();
     let pam = &enzyme.pam;
@@ -40,7 +46,8 @@ fn print_off_targets(index: &KMerIndex, query: &str, value: &str) {
                     (1 - offset_end, 1 - offset_start)
                 };
 
-                println!(
+                writeln!(
+                    out,
                     "{}\t{}\t{}\t{}\t{}\t{}",
                     query,
                     refseqs[position.refseq() as usize],
@@ -52,14 +59,17 @@ fn print_off_targets(index: &KMerIndex, query: &str, value: &str) {
                         (position.pos() + 1).to_string()
                     },
                     position.strand(),
-                );
+                )
+                .chain_err(|| "failed to write output row")?;
             }
 
-            return;
+            return Ok(());
         }
     }
 
     eprint!("WARNING: Could not look up off-targets for '{:?}'", value);
+
+    Ok(())
 }
 
 pub fn main(args: &OffTargetsArgs) -> Result<()> {
@@ -76,7 +86,9 @@ pub fn main(args: &OffTargetsArgs) -> Result<()> {
     let table = table::read(&args.table).chain_err(|| "failed to read table of target sites")?;
     eprintln!("  read {} target sites from table.", table.len());
 
-    println!("Query\tName\tStart\tEnd\tCutsite\tStrand");
+    let mut out = open_file_or_stdout(&args.output)?;
+    writeln!(out, "Query\tName\tStart\tEnd\tCutsite\tStrand")
+        .chain_err(|| "failed to write output header")?;
 
     let mut values = HashSet::new();
     for input_row in &table {
@@ -84,7 +96,7 @@ pub fn main(args: &OffTargetsArgs) -> Result<()> {
         let query = value.to_ascii_uppercase();
 
         if values.insert(value.clone()) {
-            print_off_targets(&index, &query, &value);
+            write_off_targets(&mut out, &index, &query, &value)?;
         }
     }
 

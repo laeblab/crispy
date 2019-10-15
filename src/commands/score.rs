@@ -1,7 +1,7 @@
 use rayon::prelude::*;
 
 use crate::args::ScoreArgs;
-use crate::common::encode_dna;
+use crate::common::{encode_dna, open_file_or_stdout};
 use crate::constants::*;
 use crate::errors::*;
 use crate::index::KMerIndex;
@@ -59,8 +59,10 @@ pub fn main(args: &ScoreArgs) -> Result<()> {
     });
 
     progress.finish();
+
+    let mut out = open_file_or_stdout(&args.output)?;
     for row in table {
-        println!("{}", row.join("\t"));
+        writeln!(out, "{}", row.join("\t")).chain_err(|| "failed to write output row")?;
     }
 
     Ok(())
