@@ -45,13 +45,32 @@ pub enum Args {
     None,
 }
 
+/// Command-line parameter for CRISPyR index
+fn args_index<'a, 'b>() -> Arg<'a, 'b> {
+    Arg::with_name("index")
+        .help("Path to CRISPyR index file.")
+        .required(true)
+}
+
+/// Command-line option for specifying output files
 fn args_output<'a, 'b>() -> Arg<'a, 'b> {
     Arg::with_name("output")
         .long("output")
         .short("o")
         .takes_value(true)
         .number_of_values(1)
-        .help("Write output to file instead of STDOUT")
+        .help("Write output to file instead of STDOUT.")
+}
+
+/// Command-line option for specifying the number of threads used
+fn args_threads<'a, 'b>() -> Arg<'a, 'b> {
+    Arg::with_name("threads")
+        .long("threads")
+        .takes_value(true)
+        .allow_hyphen_values(true)
+        .number_of_values(1)
+        .default_value("0")
+        .help("Number of threads used for computation (0 for automatic).")
 }
 
 fn index_command<'a, 'b>() -> App<'a, 'b> {
@@ -76,61 +95,33 @@ fn index_command<'a, 'b>() -> App<'a, 'b> {
 fn score_command<'a, 'b>() -> App<'a, 'b> {
     SubCommand::with_name("score")
         .about("Score table of gRNA targets using indexed genome")
-        .arg(
-            Arg::with_name("index")
-                .help("Path to CRISPyR index file.")
-                .required(true),
-        )
+        .arg(args_index())
         .arg(
             Arg::with_name("table")
                 .help("Table containing target sequences.")
                 .required(true),
         )
         .arg(args_output())
-        .arg(
-            Arg::with_name("threads")
-                .long("threads")
-                .takes_value(true)
-                .allow_hyphen_values(true)
-                .number_of_values(1)
-                .default_value("0")
-                .help("Number of threads used for computation (0 for automatic)."),
-        )
+        .arg(args_threads())
 }
 
 fn find_command<'a, 'b>() -> App<'a, 'b> {
     SubCommand::with_name("find")
         .about("Find and score gRNA targets in FASTA sequence(s)")
-        .arg(
-            Arg::with_name("index")
-                .help("Path to CRISPyR index file.")
-                .required(true),
-        )
+        .arg(args_index())
         .arg(
             Arg::with_name("targets")
                 .help("FASTA file containing one or more sequences.")
                 .required(true),
         )
         .arg(args_output())
-        .arg(
-            Arg::with_name("threads")
-                .long("threads")
-                .takes_value(true)
-                .allow_hyphen_values(true)
-                .number_of_values(1)
-                .default_value("0")
-                .help("Number of threads used for computation (0 for automatic)."),
-        )
+        .arg(args_threads())
 }
 
 fn off_targets_command<'a, 'b>() -> App<'a, 'b> {
     SubCommand::with_name("offtargets")
         .about("Print table of off targets for each target sequence")
-        .arg(
-            Arg::with_name("index")
-                .help("Path to CRISPyR index file.")
-                .required(true),
-        )
+        .arg(args_index())
         .arg(
             Arg::with_name("table")
                 .help("Table containing target sequences.")
