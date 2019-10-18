@@ -15,6 +15,7 @@ fn write_off_targets(
     index: &KMerIndex,
     query: &str,
     value: &str,
+    min_score: u64,
 ) -> Result<()> {
     let enzyme = index.enzyme();
     let refseqs = index.refseqs();
@@ -39,7 +40,7 @@ fn write_off_targets(
                 Position::Tail => (-cutsite - grna_len + pam_len + 1, pam_len - cutsite),
             };
 
-            for position in find_offtargets(index, kmer) {
+            for (score, position) in find_offtargets(index, kmer, min_score) {
                 let (offset_start, offset_end) = if position.strand() == '+' {
                     (offset_start, offset_end)
                 } else {
@@ -48,7 +49,7 @@ fn write_off_targets(
 
                 writeln!(
                     out,
-                    "{}\t{}\t{}\t{}\t{}\t{}",
+                    "{}\t{}\t{}\t{}\t{}\t{}\t{}",
                     query,
                     refseqs[position.refseq() as usize],
                     position.pos() as isize + offset_start,
@@ -59,6 +60,7 @@ fn write_off_targets(
                         (position.pos() + 1).to_string()
                     },
                     position.strand(),
+                    score,
                 )
                 .chain_err(|| "failed to write output row")?;
             }
@@ -87,7 +89,7 @@ pub fn main(args: &OffTargetsArgs) -> Result<()> {
     eprintln!("  read {} target sites from table.", table.len());
 
     let mut out = open_file_or_stdout(&args.output)?;
-    writeln!(out, "Query\tName\tStart\tEnd\tCutsite\tStrand")
+    writeln!(out, "Query\tName\tStart\tEnd\tCutsite\tStrand\tScore")
         .chain_err(|| "failed to write output header")?;
 
     let mut values = HashSet::new();
@@ -96,7 +98,7 @@ pub fn main(args: &OffTargetsArgs) -> Result<()> {
         let query = value.to_ascii_uppercase();
 
         if values.insert(value.clone()) {
-            write_off_targets(&mut out, &index, &query, &value)?;
+            write_off_targets(&mut out, &index, &query, &value, args.min_score)?;
         }
     }
 

@@ -114,11 +114,18 @@ returns a list of sites for each (unique) target sequence that CRISPyR considers
 to be off-targets for that sequence:
 
     $ crispyr offtargets examples/genome.fasta.crispyr_cas9 examples/targets.tsv
-    Query                    Name   Start  End  Cutsite  Strand
-    AATAGCTAGCTAGCTATAAAAGG  test   14     36   31       +
-    AATAGCTAGCTAGCTATAAAAGG  test1  14     36   31       +
-    CAGCTACTAGCTAGTCGATGNGG  tesss  120    142  137      +
-    CAGCTACTAGCTAGTCGATGNGG  tesss  162    184  179      +
+    Query                    Name   Start  End  Cutsite  Strand  Score
+    AATAGCTAGCTAGCTATAAAAGG  test   14     36   31       +       500
+    AATAGCTAGCTAGCTATAAAAGG  test1  14     36   31       +       500
+    CAGCTACTAGCTAGTCGATGNGG  tesss  120    142  137      +       500
+    CAGCTACTAGCTAGTCGATGNGG  tesss  162    184  179      +       500
+
+The Score column represents the weight given to each individual off-target, with
+the score of the query being the sum of those scores (see src/score.rs). It is
+also possible to filter off-targets based on this score, with a score of 500
+representing perfect matches between the 13bp kmer in the query and off-target:
+
+    $ crispyr offtargets examples/genome.fasta.crispyr_cas9 examples/targets.tsv --min-score 500
 
 For the 'offtargets' command to work, the genome must have been indexed with the
 '--positions' option. Note that this greatly increases the size of the index and

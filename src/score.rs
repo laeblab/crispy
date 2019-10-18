@@ -6,10 +6,36 @@ pub const MAX_MUTATIONS: usize = 3;
 pub const MAX_SEED_MUTATIONS: usize = 2;
 pub const SEED_SIZE: usize = 5;
 
+// Mismatch offtarget scoring matrix
+// seed mismatches on column and non-seed mismatches on row:
+// 		0						1						2					3				4
+// 0	0 seed and 0 non-seed	0 seed and 1 non-seed	0 seed 2 non-seed	0 seed 3 non    0 seed 4 non
+// 1	1 seed and 0 non-seed	1 seed and 1 non-seed	1 seed 2 non-seed	1 seed 3 non	not-a-target
+// 2	2 seed and 0 non-seed	2 seed and 1 non-seed	2 seed 2 non-seed	not-a-target	not-a-target
+
+// A gRNA is scored by summing the score of all possible off-targets, using the above matrix.
+// For example, a gRNA might have just 1 potential off-target, with 0 mismatches in the seed
+// region and 0 mismatches in the rest of the sequence.assert. This gRNA would receive a score
+// of 500 (1 * matrix[0][0]). Another gRNA might have 499 possible off-targets, each with 2
+// mismatches in the seed region and 2 mismatches in the rest of the sequences. That gRNA would
+// receive a score of 499 (499 * matrix[2][2]), making it a better choice than the first gRNA.
+
+// Depending on your use-case you might want to change this. E.g. you could imagine you wanted
+// to perform a test of gRNA edits at all offtargets and for that reason you wanted as few
+// potential offtargets as possible. Then you might set the score of all situations to 1 and
+// then just pick the gRNA with the lowest score.
+static SCORE_MATRIX: [[u64; 5]; 3] = [[500, 100, 50, 20, 3], [80, 30, 15, 2, 0], [20, 5, 1, 0, 0]];
+
 struct Permutation {
     kmer: KMer,
     n_seed: usize,
     n_rest: usize,
+}
+
+impl Permutation {
+    fn score(&self) -> u64 {
+        SCORE_MATRIX[self.n_seed][self.n_rest]
+    }
 }
 
 fn permute(
@@ -60,42 +86,28 @@ fn permutations(kmer: KMer) -> Vec<Permutation> {
 }
 
 pub fn calculate_score(index: &KMerIndex, kmer: KMer) -> u64 {
-    // Mismatch offtarget scoring matrix
-    // seed mismatches on column and non-seed mismatches on row:
-    // 		0						1						2					3				4
-    // 0	0 seed and 0 non-seed	0 seed and 1 non-seed	0 seed 2 non-seed	0 seed 3 non    0 seed 4 non
-    // 1	1 seed and 0 non-seed	1 seed and 1 non-seed	1 seed 2 non-seed	1 seed 3 non	not-a-target
-    // 2	2 seed and 0 non-seed	2 seed and 1 non-seed	2 seed 2 non-seed	not-a-target	not-a-target
-
-    // A gRNA is scored by summing the score of all possible off-targets, using the above matrix.
-    // For example, a gRNA might have just 1 potential off-target, with 0 mismatches in the seed
-    // region and 0 mismatches in the rest of the sequence.assert. This gRNA would receive a score
-    // of 500 (1 * matrix[0][0]). Another gRNA might have 499 possible off-targets, each with 2
-    // mismatches in the seed region and 2 mismatches in the rest of the sequences. That gRNA would
-    // receive a score of 499 (499 * matrix[2][2]), making it a better choice than the first gRNA.
-
-    // Depending on your use-case you might want to change this. E.g. you could imagine you wanted
-    // to perform a test of gRNA edits at all offtargets and for that reason you wanted as few
-    // potential offtargets as possible. Then you might set the score of all situations to 1 and
-    // then just pick the gRNA with the lowest score.
-    let matrix = [[500, 100, 50, 20, 3], [80, 30, 15, 2, 0], [20, 5, 1, 0, 0]];
-
     let mut score = 0;
     for permutation in permutations(kmer) {
         if let Some(count) = index.get_count(permutation.kmer) {
-            score += u64::from(count) * matrix[permutation.n_seed][permutation.n_rest];
+            score += u64::from(count) * permutation.score();
         }
     }
 
     score
 }
 
-pub fn find_offtargets(index: &KMerIndex, kmer: KMer) -> Vec<&Position> {
+pub fn find_offtargets(index: &KMerIndex, kmer: KMer, min_score: u64) -> Vec<(u64, &Position)> {
     let mut result = Vec::new();
 
     for permutation in permutations(kmer) {
-        if let Some(positions) = index.get_positions(permutation.kmer) {
-            result.extend(positions);
+        let score = permutation.score();
+
+        if score >= min_score {
+            if let Some(positions) = index.get_positions(permutation.kmer) {
+                for pos in positions {
+                    result.push((score, pos));
+                }
+            }
         }
     }
 

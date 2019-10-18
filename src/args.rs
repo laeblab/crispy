@@ -35,6 +35,7 @@ pub struct OffTargetsArgs {
     pub index: String,
     pub table: String,
     pub output: Option<String>,
+    pub min_score: u64,
 }
 
 pub enum Args {
@@ -128,6 +129,14 @@ fn off_targets_command<'a, 'b>() -> App<'a, 'b> {
                 .required(true),
         )
         .arg(args_output())
+        .arg(
+            Arg::with_name("min_score")
+                .long("min-score")
+                .takes_value(true)
+                .number_of_values(1)
+                .default_value("0")
+                .help("Minimum score of off-target (500 for exact kmer matches)"),
+        )
         .alias("off_targets")
 }
 
@@ -148,6 +157,15 @@ fn parse_threads(matches: &ArgMatches) -> Result<usize> {
     match usize::from_str_radix(s, 10) {
         Ok(v) => Ok(v),
         Err(err) => Err(format!("Invalid --threads ({:?}) value: {}", s, err).into()),
+    }
+}
+
+fn parse_min_score(matches: &ArgMatches) -> Result<u64> {
+    let s = get_str(matches, "min_score")?;
+
+    match u64::from_str_radix(s, 10) {
+        Ok(v) => Ok(v),
+        Err(err) => Err(format!("Invalid --min-score ({:?}) value: {}", s, err).into()),
     }
 }
 
@@ -189,6 +207,7 @@ pub fn parse_args() -> Result<Args> {
             index: get_string(matches, "index")?,
             table: get_string(matches, "table")?,
             output: matches.value_of("output").map(|s| s.to_string()),
+            min_score: parse_min_score(matches)?,
         }))
     } else if let Some(matches) = matches.subcommand_matches("find") {
         Ok(Args::Find(FindArgs {
