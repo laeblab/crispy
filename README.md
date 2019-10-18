@@ -41,6 +41,9 @@ The resulting executable is located at './target/release/crispyr'.
 
 The following examples use the files included in the 'examples' folder.
 
+Note that CRISPyR outputs results as tab separated tables. The results shown
+below have been piped through 'column -t' for the sake of readability.
+
 
 ### Indexing a genome
 
