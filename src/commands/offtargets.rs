@@ -22,12 +22,7 @@ fn write_off_targets(
     let pam = &enzyme.pam;
 
     if query.len() >= KMER_LEN + pam.len() && pam.matches(query.as_bytes()) {
-        let start = match pam.position() {
-            Position::Head => pam.len(),
-            Position::Tail => query.len() - pam.len() - KMER_LEN,
-        };
-
-        let kmer = query.as_bytes()[start..start + KMER_LEN].to_ascii_uppercase();
+        let kmer = enzyme.pam.kmer_slice(query.as_bytes()).to_ascii_uppercase();
         assert!(kmer.len() == KMER_LEN);
 
         if let Some(kmer) = encode_dna(&kmer) {

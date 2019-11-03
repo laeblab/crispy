@@ -55,20 +55,47 @@ impl PAM {
 
     pub fn kmer(&self, window: &[u8]) -> Option<(usize, KMer)> {
         if self.pam.len() + KMER_LEN <= window.len() && self.matches(window) {
-            match self.position {
-                Position::Head => {
-                    encode_dna(&window[self.len()..self.len() + KMER_LEN]).map(|v| (0, v))
-                }
-                Position::Tail => {
-                    let pam_start = window.len() - self.len();
-                    let kmer_start = pam_start - KMER_LEN;
-                    let kmer = encode_dna(&window[kmer_start..pam_start]);
+            let kmer = encode_dna(self.kmer_slice(window));
 
-                    kmer.map(|v| (pam_start, v))
-                }
+            match self.position {
+                Position::Head => kmer.map(|v| (0, v)),
+                Position::Tail => kmer.map(|v| (window.len() - self.len(), v)),
             }
         } else {
             None
+        }
+    }
+
+    /// Returns slice containing kmer. The string may be any length, but is assumed to start with
+    /// the PAM for 5' PAMs and to end with the PAM for 3' PAMs.
+    pub fn kmer_slice<'a>(&self, seq: &'a [u8]) -> &'a [u8] {
+        let (start, end) = self.kmer_pos(seq);
+
+        &seq[start as usize..end as usize]
+    }
+
+    /// Returns mutable slice containing kmer. The string may be any length, but is assumed to
+    /// start with the PAM for 5' PAMs and to end with the PAM for 3' PAMs.
+    pub fn kmer_slice_mut<'a>(&self, seq: &'a mut [u8]) -> &'a mut [u8] {
+        let (start, end) = self.kmer_pos(seq);
+
+        &mut seq[start..end]
+    }
+
+    fn kmer_pos(&self, seq: &[u8]) -> (usize, usize) {
+        let seq_len = seq.len() as isize;
+        let pam_len = self.pam.len() as isize;
+        let kmer_len = KMER_LEN as isize;
+
+        match self.position {
+            Position::Head => (
+                isize::min(seq_len, pam_len) as usize,
+                isize::min(seq_len, pam_len + kmer_len) as usize,
+            ),
+            Position::Tail => (
+                isize::max(0, seq_len - pam_len - kmer_len) as usize,
+                isize::max(0, seq_len - pam_len) as usize,
+            ),
         }
     }
 

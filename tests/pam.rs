@@ -110,3 +110,59 @@ fn test_to_string() {
 
     assert_eq!(pam.to_string(), "YTTN");
 }
+
+#[test]
+fn test_enzyme_kmer_cas9() {
+    let pam = PAM::tail(b"NGG");
+
+    assert_eq!(pam.kmer_slice(b""), b"");
+    assert_eq!(pam.kmer_slice(b"aGg"), b"");
+    assert_eq!(pam.kmer_slice(b"aTaCaGg"), b"aTaC");
+    assert_eq!(pam.kmer_slice(b"actaTccaCaTaCaGg"), b"actaTccaCaTaC");
+    assert_eq!(pam.kmer_slice(b"TatAcTTactaTccaCaTaCaGg"), b"actaTccaCaTaC");
+}
+
+#[test]
+fn test_enzyme_kmer_mut_cas9() {
+    let pam = PAM::tail(b"NGG");
+
+    assert_eq!(pam.kmer_slice_mut(&mut b"".to_owned()), b"");
+    assert_eq!(pam.kmer_slice_mut(&mut b"aGg".to_owned()), b"");
+    assert_eq!(pam.kmer_slice_mut(&mut b"aTaCaGg".to_owned()), b"aTaC");
+    assert_eq!(
+        pam.kmer_slice_mut(&mut b"actaTccaCaTaCaGg".to_owned()),
+        b"actaTccaCaTaC"
+    );
+    assert_eq!(
+        pam.kmer_slice_mut(&mut b"TatAcTTactaTccaCaTaCaGg".to_owned()),
+        b"actaTccaCaTaC"
+    );
+}
+
+#[test]
+fn test_enzyme_kmer_mad7() {
+    let pam = PAM::head(b"YTTN");
+
+    assert_eq!(pam.kmer_slice(b""), b"");
+    assert_eq!(pam.kmer_slice(b"TatA"), b"");
+    assert_eq!(pam.kmer_slice(b"TatAcTTa"), b"cTTa");
+    assert_eq!(pam.kmer_slice(b"TatAcTTactaTccaCa"), b"cTTactaTccaCa");
+    assert_eq!(pam.kmer_slice(b"TatAcTTactaTccaCaTaCaGg"), b"cTTactaTccaCa");
+}
+
+#[test]
+fn test_enzyme_kmer_mut_mad7() {
+    let pam = PAM::head(b"YTTN");
+
+    assert_eq!(pam.kmer_slice_mut(&mut b"".to_owned()), b"");
+    assert_eq!(pam.kmer_slice_mut(&mut b"TatA".to_owned()), b"");
+    assert_eq!(pam.kmer_slice_mut(&mut b"TatAcTTa".to_owned()), b"cTTa");
+    assert_eq!(
+        pam.kmer_slice_mut(&mut b"TatAcTTactaTccaCa".to_owned()),
+        b"cTTactaTccaCa"
+    );
+    assert_eq!(
+        pam.kmer_slice_mut(&mut b"TatAcTTactaTccaCaTaCaGg".to_owned()),
+        b"cTTactaTccaCa"
+    );
+}
