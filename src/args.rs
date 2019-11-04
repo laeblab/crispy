@@ -34,6 +34,7 @@ pub struct FindArgs {
 pub struct OffTargetsArgs {
     pub index: String,
     pub table: String,
+    pub fasta: Option<String>,
     pub output: Option<String>,
     pub min_score: u64,
 }
@@ -128,6 +129,14 @@ fn off_targets_command<'a, 'b>() -> App<'a, 'b> {
                 .help("Table containing target sequences.")
                 .required(true),
         )
+        .arg(
+            Arg::with_name("fasta")
+                .help(
+                    "FASTA file for index; if not specified, CRISPyR will \
+                     try using the index filename without the extension.",
+                )
+                .required(false),
+        )
         .arg(args_output())
         .arg(
             Arg::with_name("min_score")
@@ -206,6 +215,7 @@ pub fn parse_args() -> Result<Args> {
         Ok(Args::OffTargets(OffTargetsArgs {
             index: get_string(matches, "index")?,
             table: get_string(matches, "table")?,
+            fasta: matches.value_of("fasta").map(|s| s.to_string()),
             output: matches.value_of("output").map(|s| s.to_string()),
             min_score: parse_min_score(matches)?,
         }))

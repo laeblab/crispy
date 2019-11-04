@@ -117,11 +117,13 @@ returns a list of sites for each (unique) target sequence that CRISPyR considers
 to be off-targets for that sequence:
 
     $ crispyr offtargets examples/genome.fasta.crispyr_cas9 examples/targets.tsv
-    Query                    Name   Start  End  Cutsite  Strand  Score
-    AATAGCTAGCTAGCTATAAAAGG  test   14     36   31       +       500
-    AATAGCTAGCTAGCTATAAAAGG  test1  14     36   31       +       500
-    CAGCTACTAGCTAGTCGATGNGG  tesss  120    142  137      +       500
-    CAGCTACTAGCTAGTCGATGNGG  tesss  162    184  179      +       500
+    Query                    Offtarget                Name   Start  End  Cutsite  Strand  Score
+    aatagctAGCTAGCTATAAAagg  gctagctAGCTAGCTATAAAagg  test   14     36   31       +       500
+    aatagctAGCTAGCTATAAAagg  gctagctAGCTAGCTATAAAagg  test1  14     36   31       +       500
+    cagctacTAGCTAGTCGATGngg  cagctacTAGCTAGTCGATGcgg  tesss  120    142  137      +       500
+    cagctacTAGCTAGTCGATGngg  cagctacTAGCTAGTCGATGcgg  tesss  162    184  179      +       500
+
+The 13bp kmer used to identify off-targets (see above) is written in uppercase.
 
 The Score column represents the weight given to each individual off-target, with
 the score of the query being the sum of those scores (see src/score.rs). It is
@@ -138,3 +140,12 @@ isn't recommended unless you specifically need the 'offtargets' functionality:
 
 Target sequences must meet the requirements described for the 'score' command;
 any value that does not meet these requirements trigger a warning.
+
+The Offtarget column requires the availability of a faidx indexed FASTA file:
+
+    $ samtools faidx /path/to/genome.fasta
+
+By default CRISPyR will attempt to the filename produced by removing the
+'.crispyr_*' extension from the index filename, but an alternative path may be
+specified using the '--fasta' option. If no such FASTA file is available, then
+this column will contain the value 'NA'.
