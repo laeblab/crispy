@@ -180,7 +180,7 @@ fn parse_min_score(matches: &ArgMatches) -> Result<u64> {
 
 fn new_parser<'a, 'b>() -> App<'a, 'b> {
     App::new("CRISPyR")
-        .version("0.1.1")
+        .version("0.2.0")
         .author("Mikkel Schubert")
         .subcommand(index_command())
         .subcommand(score_command())

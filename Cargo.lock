@@ -212,7 +212,7 @@ dependencies = [
 
 [[package]]
 name = "crispyr"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "bio 0.28.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "bio-types 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
