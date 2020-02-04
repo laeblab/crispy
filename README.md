@@ -1,8 +1,9 @@
 # CRISPyR - A CRISPR target finding tool based on CRISPy
 
-CRISPyR is a command-line tool based on CRISPy (Ronda et al. 2014) for finding
-and scoring CRISPR target sites in FASTA sequences. CRISPyR supports Cas9 (the
-default) and Mad7 (experimental).
+CRISPyR is a command-line tool based on CRISPy ([https://doi.org/10.1002/bit.25233](https://doi.org/10.1002/bit.25233)).
+Its a RUST rewrite (and extension) of the original python code, hence the 'R' in the name.
+You can use it for finding and scoring CRISPR target sites in FASTA sequences. 
+CRISPyR supports the Cas9 (the default) and the Mad7 (experimental) endonucleases.
 
 CRISPyR finds candidate target sequences by searching a genome for PAM sites
 (NGG-'3 for Cas9, 5'-YTTN for Mad7). Alternatively, the user may supply a list
@@ -21,7 +22,7 @@ If you use CRISPyR, then please cite the paper:
     Cas9 and CRISPy, a web-based target finding tool.Biotechnol. Bioeng. 111:
     1604–1616. doi: 10.1002/bit.25233
 
-[https://onlinelibrary.wiley.com/doi/full/10.1002/bit.25233](https://onlinelibrary.wiley.com/doi/full/10.1002/bit.25233)
+[https://doi.org/10.1002/bit.25233](https://doi.org/10.1002/bit.25233)
 
 
 ## Installation
