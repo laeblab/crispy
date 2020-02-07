@@ -13,6 +13,8 @@ targets based on the number of sequences matching the 13bp adjacent to the PAM
 represents the number putative off-targets, with a higher score representing
 more and/or closely matching off-target sequences.
 
+### The offtarget score for Mad7 is highly theoretical. We have been unable to find any study comprehensively looking at determinants for Mad7 offtargets, but we suspect they may be similar to Cpf1 due to their similarity.
+
 CRISPyR can return also return a list of all positions in the genome that it
 considers as putative off-targets for a given target sequence.
 
