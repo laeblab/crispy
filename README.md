@@ -93,21 +93,23 @@ sequences with lower scores should be selected when possible.
 
 ### Scoring existing target sequences
 
-The 'score' command takes a CRISPyR index and a tab separated table and
-appends the CRISPy score for each row in which the first column contains a
+The 'score' command can be used to score a set of gRNAs that have been obtained 
+without using CRISPyR. It needs an index and a tab separated table and it will
+append the CRISPy score for each row in which the first column contains a
 target sequence matching the PAM used to create the index:
 
     $ crispyr score examples/genome.fasta.crispyr_cas9 examples/targets.tsv
     AATAGCTAGCTAGCTATAAAAGG  2 copy target                      1000
     CAGCTACTAGCTAGTCGATGNGG  2 copy target                      1000
-    CCCCCCCCCCCCCCCCCCCCCGG  not a target at all. should get 0  0
+    CCCCCCCCCCCCCCCCCCCCCAA  not a target at all. should get 0  0
 
-CRISPyR will only attempt to score target sequences that 1) contains a PAM,
-2) contains at least 13 bp in addition to the PAM, 3) the 13 bp only consist
-of nucleotides A, C, G, or T. Invalid target sequences will be assigned the
+CRISPyR will only attempt to score target sequences that 
+1. contains a PAM,
+2. contains at least 13 bp in addition to the PAM
+3. the 13 bp only consist of nucleotides A, C, G, or T. Invalid target sequences will be assigned the
 score 'NA'.
 
-The input table may (optionally) contain a header, in which case CRISPyR will
+The input table may (optional) contain a header, in which case CRISPyR will
 appends a column named 'Score'.
 
 
