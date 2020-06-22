@@ -16,7 +16,7 @@ use crate::score::calculate_score;
 struct TargetSite {
     start: isize,
     end: isize,
-    cutsite: Option<isize>,
+    cutsite: isize,
     strand: Strand,
     sequence: Vec<u8>,
     score: u64,
@@ -38,7 +38,7 @@ fn collect_forward_targets(sequence: &[u8], index: &KMerIndex, pg: &ProgressBar)
                 Some(TargetSite {
                     start: idx as isize,
                     end: idx as isize + window.len() as isize,
-                    cutsite: cutsite.map(|v| (idx + pam_pos) as isize + v as isize),
+                    cutsite: (idx + pam_pos) as isize + cutsite,
                     strand: Strand::Forward,
                     sequence: window.to_owned(),
                     score: calculate_score(index, kmer),
@@ -64,7 +64,7 @@ fn collect_reverse_targets(sequence: &[u8], index: &KMerIndex, pg: &ProgressBar)
 
         site.start = start;
         site.end = end;
-        site.cutsite = site.cutsite.map(|v| sequence.len() as isize - v);
+        site.cutsite = sequence.len() as isize - site.cutsite;
         site.strand = Strand::Reverse;
     }
 
@@ -129,9 +129,7 @@ pub fn main(args: &FindArgs) -> Result<()> {
                 target.id(),
                 site.start + 1,
                 site.end,
-                site.cutsite
-                    .map(|v| (v + 1).to_string())
-                    .unwrap_or_else(|| "NA".to_owned()),
+                site.cutsite + 1,
                 site.strand.strand_symbol(),
                 site.score,
             )

@@ -125,7 +125,7 @@ fn write_off_targets(
         if let Some(kmer) = encode_dna(&kmer) {
             let grna_len = enzyme.grna_len as isize;
             let pam_len = pam.len() as isize;
-            let cutsite = enzyme.cutsite.unwrap_or(0);
+            let cutsite = enzyme.cutsite;
 
             let (offset_start, offset_end) = match pam.position() {
                 Position::Head => (1 - cutsite, grna_len - cutsite),
@@ -159,11 +159,7 @@ fn write_off_targets(
                     refseq,
                     start,
                     end,
-                    if enzyme.cutsite.is_none() {
-                        "NA".to_owned()
-                    } else {
-                        (position.pos() + 1).to_string()
-                    },
+                    position.pos() + 1,
                     position.strand(),
                     score,
                 )

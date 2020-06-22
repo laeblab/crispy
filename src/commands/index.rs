@@ -39,7 +39,7 @@ fn collect_hashes<P: AsRef<Path> + Debug>(
         for (idx, window) in sequence.windows(enzyme.pam.len() + KMER_LEN).enumerate() {
             if let Some((pam_pos, kmer)) = enzyme.pam.kmer(window) {
                 // If the cut-site is unknown, then save the starting position of the target seq
-                let pos = ((idx + pam_pos) as isize + enzyme.cutsite.unwrap_or(0)) as i32;
+                let pos = ((idx + pam_pos) as isize + enzyme.cutsite) as i32;
 
                 hashes.add(Position::forward(refseq as u32, pos), kmer);
             }
@@ -51,8 +51,8 @@ fn collect_hashes<P: AsRef<Path> + Debug>(
         {
             if let Some((pam_pos, kmer)) = enzyme.pam.kmer(window) {
                 // If the cut-site is unknown, then save the starting position of the target seq
-                let pos = sequence.len() as i32
-                    - ((idx + pam_pos) as isize + enzyme.cutsite.unwrap_or(0)) as i32;
+                let pos =
+                    sequence.len() as i32 - ((idx + pam_pos) as isize + enzyme.cutsite) as i32;
 
                 hashes.add(Position::reverse(refseq as u32, pos), kmer);
             }

@@ -8,7 +8,7 @@ pub struct Enzyme {
     pub grna_len: usize,
 
     pub pam: PAM,
-    pub cutsite: Option<isize>,
+    pub cutsite: isize,
 }
 
 impl Enzyme {
@@ -28,7 +28,7 @@ impl Enzyme {
             grna_len: 23,
 
             pam: PAM::tail(b"NGG"),
-            cutsite: Some(-3),
+            cutsite: -3,
         }
     }
 
@@ -40,7 +40,9 @@ impl Enzyme {
             grna_len: 25,
 
             pam: PAM::head(b"YTTN"),
-            cutsite: None,
+            // Cut-site according to
+            // https://horizondiscovery.com/en/products/gene-editing/gene-editing-reagents/mad7
+            cutsite: 19,
         }
     }
 }
