@@ -5,7 +5,7 @@ authors = ["Mikkel Schubert <miksch@biosustain.dtu.dk>"]
 edition = "2018"
 
 [dependencies]
-bio = "0.28.0"
+bio = "0.31.0"
 bio-types = "0.5.1"
 byteorder = "1.3.2"
 clap = "2.33.0"
