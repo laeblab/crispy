@@ -183,8 +183,8 @@ impl KMerIndex {
             .take(INDEX_HEADER.len() as u64)
             .read_to_end(&mut buffer)
             .chain_err(|| "failed to read index header")?;
+
         if buffer != INDEX_HEADER {
-            println!("{:?}", buffer);
             return Err("file is not a valid CRISPyR index file".into());
         }
 
