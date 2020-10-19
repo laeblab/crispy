@@ -1,23 +1,15 @@
 # CRISPyR - A CRISPR target finding tool based on CRISPy
 
-CRISPyR is a command-line tool based on CRISPy ([https://doi.org/10.1002/bit.25233](https://doi.org/10.1002/bit.25233)).
-Its a RUST rewrite (and extension) of the original python code, hence the 'R' in the name.
+CRISPyR is a command-line tool based on CRISPy ([https://doi.org/10.1002/bit.25233](https://doi.org/10.1002/bit.25233)).  
+Its a RUST rewrite (and extension) of the original CRISPy, hence the 'R' in the name.  
 You can use it for finding and scoring CRISPR target sites in FASTA sequences. 
-CRISPyR supports the Cas9 (the default) and the Mad7 (experimental) endonucleases.
-
-CRISPyR finds candidate target sequences by searching a genome for PAM sites
-(NGG-'3 for Cas9, 5'-YTTN for Mad7). Alternatively, the user may supply a list
-of target sequences for a given enzyme. Each target sequence is scored for off-
-targets based on the number of sequences matching the 13bp adjacent to the PAM
-(upstream of the PAM for Cas9 and downstream for Mad7). The resulting score
-represents the number putative off-targets, with a higher score representing
-more and/or closely matching off-target sequences.
-
-### The offtarget score for Mad7 is highly theoretical. We have been unable to find any study comprehensively looking at determinants for Mad7 offtargets, but we suspect they may be similar to Cpf1 due to their similarity.
-
-CRISPyR can return also return a list of all positions in the genome that it
-considers as putative off-targets for a given target sequence.
-
+CRISPyR supports the Cas9 (the default) and the Mad7 (experimental) endonucleases.  
+  
+CRISPyR finds candidate target sequences and gives an off-target score.  
+  
+Target sequences are found either by searching a genome (or any fasta file) for PAM sites (NGG-'3 for Cas9, 5'-YTTN for Mad7) or alternatively, the user may supply a list of target sequences.  
+Each target sequence is scored for off-targets based on the number of sequences matching the 13bp adjacent to the PAM (upstream of the PAM for Cas9 and downstream for Mad7). The resulting score represents the number putative off-targets, with a higher score representing more and/or closely matching off-target sequences.  
+  
 If you use CRISPyR, then please cite the paper:
 
     Ronda et al (2014). Accelerating genome editing in CHO cells using CRISPR
