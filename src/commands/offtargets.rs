@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
@@ -18,6 +18,8 @@ use crate::table;
 
 struct OfftargetReader {
     reader: Option<IndexedReader<File>>,
+    // FIXME: This should be made redudant by improving IndexedReader
+    refseqs: Option<HashMap<String, u64>>,
 }
 
 impl OfftargetReader {
@@ -47,19 +49,38 @@ impl OfftargetReader {
             None
         };
 
-        Ok(OfftargetReader { reader })
+        let refseqs = if let Some(reader) = &reader {
+            Some(
+                reader
+                    .index
+                    .sequences()
+                    .into_iter()
+                    .map(|seq| (seq.name, seq.len))
+                    .collect(),
+            )
+        } else {
+            None
+        };
+
+        Ok(OfftargetReader { reader, refseqs })
     }
 
     fn fetch(
         &mut self,
         refseq: &str,
-        mut start: isize,
+        start: isize,
         end: isize,
         strand: char,
     ) -> Result<Option<Vec<u8>>> {
         assert!(start < end);
 
         if let Some(reader) = &mut self.reader {
+            let refseqs = self.refseqs.as_ref().unwrap();
+            let refseq_len = match refseqs.get(refseq) {
+                Some(refseq_len) => refseq_len,
+                None => return Err(format!("Unknown refseq {:?}", refseq).into()),
+            };
+
             let len = (end - start) as usize;
 
             if end <= 0 {
@@ -70,15 +91,19 @@ impl OfftargetReader {
                 // 3' PAM gRNAs may extend past the beginning of the refseq
                 if start < 0 {
                     seq.resize(start.abs() as usize, b'N');
-                    start = 0;
                 }
 
                 reader
-                    .fetch(refseq, start as u64, end as u64)
+                    .fetch(
+                        refseq,
+                        isize::max(0, start) as u64,
+                        u64::min(*refseq_len, end as u64),
+                    )
                     .chain_err(|| "failed to fetch refseq")?;
-                reader
-                    .read(&mut seq)
-                    .chain_err(|| "failed to read refseq")?;
+
+                for nuc in reader.read_iter().chain_err(|| "failed to fetch refseq")? {
+                    seq.push(nuc.chain_err(|| "error while reading refseq")?);
+                }
 
                 // 5' PAM gRNAs may extend past the end of the refseq
                 seq.resize(len, b'N');

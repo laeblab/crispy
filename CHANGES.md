@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [0.2.1] - 2019-11-04
+### FIXED
+  - Fixed `offtarget` aborting or reporting malformed sequences for putative off-targets
+    overlapping either end of the refseq.
+
 ## [0.2.0] - 2019-11-04
 ### ADDED
  - Option --output for writing output to file instead of STDOUT; is available
