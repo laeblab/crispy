@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## [0.2.1] - 2019-11-04
+## [0.2.1] - 2020-11-23
 ### FIXED
   - Fixed `offtarget` aborting or reporting malformed sequences for putative off-targets
     overlapping either end of the refseq.
