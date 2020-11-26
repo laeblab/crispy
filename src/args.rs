@@ -27,6 +27,7 @@ pub struct FindArgs {
     pub index: String,
     pub targets: String,
     pub output: Option<String>,
+    pub bedfile: Option<String>,
     pub threads: usize,
 }
 
@@ -115,6 +116,19 @@ fn find_command<'a, 'b>() -> App<'a, 'b> {
             Arg::with_name("targets")
                 .help("FASTA file containing one or more sequences.")
                 .required(true),
+        )
+        .arg(
+            Arg::with_name("bedfile")
+                .long("bed")
+                .takes_value(true)
+                .number_of_values(1)
+                .help(
+                    "Collect gRNAs with cut-sites inside the named regions in this \
+                     BED file. Note that cut-sites may not be exact and that it is \
+                     therefore safest to pick gRNAs with cut-sites some number of bp \
+                     from the start and the end of the target region. Also note that \
+                     overlapping regions are not merged.",
+                ),
         )
         .arg(args_output())
         .arg(args_threads())
@@ -223,6 +237,7 @@ pub fn parse_args() -> Result<Args> {
         Ok(Args::Find(FindArgs {
             index: get_string(matches, "index")?,
             targets: get_string(matches, "targets")?,
+            bedfile: matches.value_of("bedfile").map(|s| s.to_string()),
             output: matches.value_of("output").map(|s| s.to_string()),
             threads: parse_threads(matches)?,
         }))
