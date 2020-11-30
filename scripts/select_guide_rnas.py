@@ -135,6 +135,9 @@ def read_gff3_mrna(genes: GeneMap, mapping: Dict[str, str], record: Any) -> None
 
     if record_id in mapping:
         raise GFF3Error("duplicate mRNA %r" % (record_id,))
+    elif parent_id not in genes:
+        # mRNA did not belong to a 'gene' feature
+        return
 
     # TODO: Compare strand/contig
 
@@ -152,17 +155,14 @@ def read_gff3_cds(genes: GeneMap, mapping: Dict[str, str], record: Any) -> None:
     parent_id = attributes["Parent"]  # FIXME: KeyError
 
     # TODO: Compare strand/contig
-
-    try:
-        gene_id = mapping[parent_id]
-    except KeyError:
-        sys.stderr.write(
-            f"WARNING: expected mRNA {parent_id} not found; checking in genes\n"
-        )
+    gene_id = mapping.get(parent_id)
+    if gene_id is None:
         if parent_id not in genes:
-            raise GFF3Error(f"parent {parent_id} not found")
+            # CDS belonged to something other than a 'mRNA' or 'gene' feature
+            return
 
         gene_id = parent_id
+        # Create dummy mRNA record
         genes[gene_id]["mRNAs"].setdefault(
             parent_id,
             {
